@@ -2,8 +2,7 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User
-from app.dependencies import get_db
-from app.database import Base, engine
+from app.database import Base, engine, get_db
 
 app = FastAPI()
 
@@ -16,7 +15,7 @@ async def startup():
 
 
 @app.post("/users/", response_model=User)
-async def create_user(name: str, email: str, db: AsyncSession = Depends(get_db)):
+async def create_user(name: str, email: str, db=Depends(get_db)):
     user = User(name=name, email=email)
     db.add(user)
     await db.commit()
