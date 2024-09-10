@@ -1,9 +1,9 @@
 # main.py
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import User
-from dependencies import get_db
-from database import Base, engine
+from app.models import User
+from app.dependencies import get_db
+from app.database import Base, engine
 
 app = FastAPI()
 
