@@ -27,3 +27,31 @@ async def post_user(
         return UsersPostUserResponse(id=user.id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class UsersPutOnboardUserRequest(BaseModel):
+    phone: str
+    name: str
+
+
+class UsersPutOnboardUserResponse(BaseModel):
+    pass
+
+
+@user_router.put("/onboard")
+async def onboard_user(
+    req: UsersPutOnboardUserRequest, session: Session = Depends(get_db)
+) -> UsersPutOnboardUserResponse:
+    try:
+        user_context = UserContext(UserRepository(session))
+        user: User | None = user_context.user_exists_by_phone(phone=req.phone)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user_context.onboard_user(user=user, name=req.name)
+        return UsersPutOnboardUserResponse()
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

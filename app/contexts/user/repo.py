@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.contexts.user.models import User
 
@@ -14,3 +15,8 @@ class UserRepository:
         self.session.add(user)
         self.session.commit()
         return user
+
+    def save_user(self, user: User) -> User:
+        user.updated_at = datetime.now(timezone.utc)
+        self.session.add(user)
+        self.session.commit()

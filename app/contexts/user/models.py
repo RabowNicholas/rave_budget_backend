@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional
+from uuid import uuid4
 
 from sqlalchemy import DateTime as DateTimeC
 from sqlalchemy import String
@@ -15,6 +16,7 @@ class User(Base):
         String,
         primary_key=True,
         unique=True,
+        default=str(uuid4()),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTimeC,
@@ -25,3 +27,4 @@ class User(Base):
         String,
         unique=True,
     )
+    name: Mapped[Optional[str]] = mapped_column(String)
