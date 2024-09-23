@@ -15,13 +15,19 @@ from app.database import get_db
 budget_router = APIRouter()
 
 
+class BudgetOverviewRequest(BaseModel):
+    name: str
+    date: datetime
+    location: str
+
+
 class BudgetLimitRequest(BaseModel):
     category: str
     amount: float
 
 
 class BudgetPostBudgetRequest(BaseModel):
-    overview: BudgetOverviewData
+    overview: BudgetOverviewRequest
     limits: list[BudgetLimitRequest]
 
 
@@ -52,20 +58,21 @@ async def post_budget(
 
 def _parse_post_budget_request(req: BudgetPostBudgetRequest) -> BudgetData:
     try:
-        overview = BudgetOverviewData(
-            name=req.overview.name,
-            date=datetime.fromisoformat(req.overview.date),
-            location=req.overview.location,
-        )
+        overview = BudgetOverviewData()
+        overview.name = req.overview.name
+        overview.date = req.overview.date
+        overview.location = req.overview.location
 
-        limits = [
-            BudgetLimitData(
-                category=BudgetDataEnum[l.category],
-                amount=l.amount,
-            )
-            for l in req.limits
-        ]
+        limits = []
+        for l in req.limits:
+            limit = BudgetLimitData()
+            limit.category = BudgetDataEnum(l.category).value
+            limit.amount = l.amount
+            limits.append(limit)
 
-        return BudgetData(overview=overview, limits=limits)
+        budget_data = BudgetData()
+        budget_data.overview = overview
+        budget_data.limits = limits
+        return budget_data
     except Exception as e:
         raise ValueError("Error parsing budget request data") from e
