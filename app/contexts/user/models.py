@@ -16,11 +16,11 @@ class User(Base):
         String,
         primary_key=True,
         unique=True,
-        default=str(uuid4()),
+        default=lambda: str(uuid4()),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTimeC,
-        default=datetime.now(timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTimeC, default=None)
     phone: Mapped[str] = mapped_column(

@@ -14,11 +14,11 @@ class Budget(Base):
         String,
         primary_key=True,
         unique=True,
-        default=str(uuid4()),
+        default=lambda: str(uuid4()),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTimeC,
-        default=datetime.now(timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
     )
     user_id: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String)
@@ -37,7 +37,7 @@ class BudgetLimit(Base):
         String,
         primary_key=True,
         unique=True,
-        default=str(uuid4()),
+        default=lambda: str(uuid4()),
     )
     budget_id: Mapped[str] = mapped_column(String, ForeignKey("budget.id"))
     category: Mapped[str] = mapped_column(String)
