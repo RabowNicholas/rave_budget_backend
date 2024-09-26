@@ -16,3 +16,6 @@ class BudgetRepository:
         self.session.commit()
 
         return budget
+
+    def get_budgets_for_user_id(self, user_id: str) -> list[Budget]:
+        return self.session.query(Budget).filter(Budget.user_id == user_id).all()

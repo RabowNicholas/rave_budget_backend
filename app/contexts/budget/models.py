@@ -3,6 +3,8 @@ from uuid import uuid4
 from sqlalchemy import DateTime as DateTimeC, Float, ForeignKey
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
+
 
 from app.database import Base
 
@@ -28,6 +30,11 @@ class Budget(Base):
     limits: Mapped[list["BudgetLimit"]] = relationship(
         "BudgetLimit", back_populates="budget"
     )
+
+    @hybrid_property
+    def total_budget(self) -> float:
+        # Return the sum of all the budget limits (amount) for this budget
+        return sum(limit.amount for limit in self.limits)
 
 
 class BudgetLimit(Base):

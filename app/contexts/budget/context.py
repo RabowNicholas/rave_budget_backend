@@ -37,6 +37,9 @@ class BudgetContext:
         budget = self._prepare_budget(user_id=user_id, data=data)
         return self.repository.save_budget(budget)
 
+    def get_budgets_for_user(self, user_id: str) -> list[Budget]:
+        return self.repository.get_budgets_for_user_id(user_id)
+
     def _prepare_budget(self, user_id: str, data: BudgetData) -> Budget:
         budget = Budget(
             user_id=user_id,
