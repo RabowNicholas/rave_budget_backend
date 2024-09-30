@@ -1,3 +1,4 @@
 # models.py
-from app.contexts.user.models import User
-from app.contexts.budget.models import Budget, BudgetLimit
+import app.contexts.user.models
+import app.contexts.budget.models
+import app.contexts.interest.models
