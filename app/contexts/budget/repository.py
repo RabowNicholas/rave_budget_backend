@@ -17,5 +17,8 @@ class BudgetRepository:
 
         return budget
 
+    def get_budget_by_id(self, budget_id: str) -> Budget | None:
+        return self.session.query(Budget).filter(Budget.id == budget_id).one()
+
     def get_budgets_for_user_id(self, user_id: str) -> list[Budget]:
         return self.session.query(Budget).filter(Budget.user_id == user_id).all()

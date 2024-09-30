@@ -29,6 +29,10 @@ class BudgetData:
     limits: list[BudgetLimitData]
 
 
+class BudgetNotFoundException(Exception):
+    pass
+
+
 class BudgetContext:
     def __init__(self, repository: BudgetRepository):
         self.repository = repository
@@ -36,6 +40,13 @@ class BudgetContext:
     def create_budget(self, user_id: str, data: BudgetData) -> Budget:
         budget = self._prepare_budget(user_id=user_id, data=data)
         return self.repository.save_budget(budget)
+
+    def get_budget(self, budget_id: str) -> Budget:
+
+        budget = self.repository.get_budget_by_id(budget_id)
+        if not budget:
+            raise BudgetNotFoundException("Budget not found")
+        return budget
 
     def get_budgets_for_user(self, user_id: str) -> list[Budget]:
         return self.repository.get_budgets_for_user_id(user_id)
