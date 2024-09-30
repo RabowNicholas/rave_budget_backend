@@ -38,6 +38,10 @@ class Budget(Base):
     def total_budget(self) -> float:
         return sum(limit.amount for limit in self.limits)
 
+    @hybrid_property
+    def total_expense(self) -> float:
+        return sum(e.amount for e in self.expenses)
+
 
 class BudgetLimit(Base):
     __tablename__: str = "budget_limit"

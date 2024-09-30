@@ -52,13 +52,34 @@ def _pack_response(budgets: list[Budget]) -> list[BudgetOverviewResponse]:
     budgets_response: list[BudgetOverviewResponse] = []
 
     for b in budgets:
+        category_expense_map = {}
+        for expense in b.expenses:
+            if expense.category in category_expense_map:
+                category_expense_map[expense.category] += expense.amount
+            else:
+                category_expense_map[expense.category] = expense.amount
+
         budget_breakdown: list[BudgetCategoryBreakdownResponse] = []
+        total_unexpected_expenses = 0
+
         for l in b.limits:
-            # TODO: add spent amount when expenses are in
+            spent_amount = category_expense_map.pop(l.category, 0)
+
             breakdown = BudgetCategoryBreakdownResponse(
                 category=l.category,
                 budgeted_amount=l.amount,
-                expense_amount=0,
+                expense_amount=spent_amount,
+            )
+            budget_breakdown.append(breakdown)
+
+        for spent_amount in category_expense_map.items():
+            total_unexpected_expenses += spent_amount
+
+        if total_unexpected_expenses > 0:
+            breakdown = BudgetCategoryBreakdownResponse(
+                category="Unexpected",
+                budgeted_amount=0,
+                expense_amount=total_unexpected_expenses,
             )
             budget_breakdown.append(breakdown)
 
@@ -68,8 +89,8 @@ def _pack_response(budgets: list[Budget]) -> list[BudgetOverviewResponse]:
             date=b.date,
             location=b.location,
             total_budget=b.total_budget,
-            total_spent=0,
-            remaining_balance=b.total_budget - 0,
+            total_spent=b.total_expense,
+            remaining_balance=b.total_budget - b.total_expense,
             category_breakdown=budget_breakdown,
         )
 

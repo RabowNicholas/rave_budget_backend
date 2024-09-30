@@ -98,23 +98,47 @@ class BudgetGetBudgetResponse(CamelModel):
 
 
 def _pack_get_budget_response(b: Budget) -> BudgetGetBudgetResponse:
-    # TODO: add in total spent and expense amount after expenses
+    category_expense_map = {}
+
+    for expense in b.expenses:
+        if expense.category in category_expense_map:
+            category_expense_map[expense.category] += expense.amount
+        else:
+            category_expense_map[expense.category] = expense.amount
+
+    budget_breakdown: list[BudgetCategoryBreakdownResponse] = []
+    total_unexpected_expenses = 0
+
+    for l in b.limits:
+        spent_amount = category_expense_map.pop(l.category, 0)
+
+        breakdown = BudgetCategoryBreakdownResponse(
+            category=l.category,
+            budgeted_amount=l.amount,
+            expense_amount=spent_amount,
+        )
+        budget_breakdown.append(breakdown)
+
+    for spent_amount in category_expense_map.items():
+        total_unexpected_expenses += spent_amount
+
+    if total_unexpected_expenses > 0:
+        breakdown = BudgetCategoryBreakdownResponse(
+            category="Unexpected",
+            budgeted_amount=0,
+            expense_amount=total_unexpected_expenses,
+        )
+        budget_breakdown.append(breakdown)
+
     return BudgetGetBudgetResponse(
         id=b.id,
         name=b.name,
         date=b.date,
         location=b.location,
         total_budget=b.total_budget,
-        total_spent=0,
-        remaining_balance=b.total_budget - 0,
-        category_breakdown=[
-            BudgetCategoryBreakdownResponse(
-                category=l.category,
-                budgeted_amount=l.amount,
-                expense_amount=0,
-            )
-            for l in b.limits
-        ],
+        total_spent=b.total_expense,
+        remaining_balance=b.total_budget - b.total_expense,
+        category_breakdown=budget_breakdown,
     )
 
 
