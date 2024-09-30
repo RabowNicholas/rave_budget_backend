@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from app.contexts.budget.models import Budget, BudgetLimit
+from app.contexts.budget.models import Budget, BudgetExpense, BudgetLimit
 from app.contexts.budget.repository import BudgetRepository
 
 
@@ -50,6 +50,16 @@ class BudgetContext:
 
     def get_budgets_for_user(self, user_id: str) -> list[Budget]:
         return self.repository.get_budgets_for_user_id(user_id)
+
+    def add_expense(
+        self, budget_id: str, amount: float, category: str
+    ) -> BudgetExpense:
+        e = BudgetExpense(
+            budget_id=budget_id,
+            amount=amount,
+            category=category,
+        )
+        return self.repository.save_expense(e)
 
     def _prepare_budget(self, user_id: str, data: BudgetData) -> Budget:
         budget = Budget(

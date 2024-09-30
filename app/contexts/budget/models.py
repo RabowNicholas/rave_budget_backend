@@ -30,10 +30,12 @@ class Budget(Base):
     limits: Mapped[list["BudgetLimit"]] = relationship(
         "BudgetLimit", back_populates="budget"
     )
+    expenses: Mapped[list["BudgetExpense"]] = relationship(
+        "BudgetExpense", back_populates="budget"
+    )
 
     @hybrid_property
     def total_budget(self) -> float:
-        # Return the sum of all the budget limits (amount) for this budget
         return sum(limit.amount for limit in self.limits)
 
 
@@ -51,3 +53,16 @@ class BudgetLimit(Base):
     amount: Mapped[float] = mapped_column(Float)
 
     budget: Mapped["Budget"] = relationship("Budget", back_populates="limits")
+
+
+class BudgetExpense(Base):
+    __tablename__: str = "budget_expense"
+
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, unique=True, default=lambda: str(uuid4())
+    )
+    budget_id: Mapped[str] = mapped_column(String, ForeignKey("budget.id"))
+    category: Mapped[str] = mapped_column(String)
+    amount: Mapped[float] = mapped_column(Float)
+
+    budget: Mapped["Budget"] = relationship("Budget", back_populates="expenses")

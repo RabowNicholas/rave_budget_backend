@@ -118,15 +118,34 @@ def _pack_get_budget_response(b: Budget) -> BudgetGetBudgetResponse:
     )
 
 
-@budget_router.get("/{id}")
+@budget_router.get("/{budget_id}")
 async def get_budget(
-    id: str,
+    budget_id: str,
     user_id: str = Header(),
     session: Session = Depends(get_db),
 ) -> BudgetGetBudgetResponse:
     budget_context = BudgetContext(BudgetRepository(session))
-    budget = budget_context.get_budget(id)
+    budget = budget_context.get_budget(budget_id)
     if budget.user_id != user_id:
         raise NotAuthorizedException("user not authorized to access budget")
     response = _pack_get_budget_response(budget)
     return response
+
+
+class BudgetPostExpenseRequest(CamelModel):
+    amount: float
+    category: str
+
+
+@budget_router.post("/{budget_id}/expense")
+async def post_expense(
+    budget_id: str,
+    req: BudgetPostExpenseRequest,
+    user_id: str = Header(),
+    session: Session = Depends(get_db),
+) -> None:
+    budget_context = BudgetContext(BudgetRepository(session))
+    budget = budget_context.get_budget(budget_id)
+    if budget.user_id != user_id:
+        raise NotAuthorizedException("user not authorize to access budget")
+    budget_context.add_expense(budget_id, req.amount, req.category)

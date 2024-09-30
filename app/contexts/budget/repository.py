@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.contexts.budget.models import Budget, BudgetLimit
+from app.contexts.budget.models import Budget, BudgetExpense, BudgetLimit
 
 
 class BudgetRepository:
@@ -22,3 +22,8 @@ class BudgetRepository:
 
     def get_budgets_for_user_id(self, user_id: str) -> list[Budget]:
         return self.session.query(Budget).filter(Budget.user_id == user_id).all()
+
+    def save_expense(self, budget_expense: BudgetExpense) -> BudgetExpense:
+        self.session.add(budget_expense)
+        self.session.commit()
+        return budget_expense
