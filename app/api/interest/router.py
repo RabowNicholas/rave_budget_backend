@@ -9,9 +9,8 @@ from app.database import get_db
 
 interest_router = APIRouter()
 
-interest_router.post("/feature/{name}")
 
-
+@interest_router.post("/feature/{name}")
 async def post_feature_interest(
     name: str,
     user_id: str = Header(),
