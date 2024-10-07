@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Freeze Dependencies",
+      "type": "process",
+      "command": "bash",
+      "args": ["scripts/freezeDependencies.sh"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Requirements",
+      "type": "process",
+      "command": "bash",
+      "args": ["scripts/installRequirements.sh"]
+    }
+  ]
+}
