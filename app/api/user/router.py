@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from fastapi_camelcase import CamelModel
 from sqlalchemy.orm import Session
 
-from app.contexts.user.context import UserContext
+from app.contexts.user.context import UserContext, UserUpdateData
 from app.contexts.user.models import User
 from app.contexts.user.repo import UserRepository
 from app.database import get_db
@@ -11,7 +11,7 @@ from app.database import get_db
 user_router = APIRouter()
 
 
-class UsersPostUserResponse(BaseModel):
+class UsersPostUserResponse(CamelModel):
     id: str
 
 
@@ -26,10 +26,10 @@ async def post_user(
             user = user_context.create_user(phone=phone)
         return UsersPostUserResponse(id=user.id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-class UsersGetUserResponse(BaseModel):
+class UsersGetUserResponse(CamelModel):
     id: str
     onboarded: bool
 
@@ -52,15 +52,74 @@ async def get_user(
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-class UsersPutOnboardUserRequest(BaseModel):
+class UsersGetUserByIdResponse(CamelModel):
+    id: str
+    name: str
+    phone: str
+
+
+@user_router.get("/id/{user_id}")
+async def get_user_by_id(
+    user_id: str, session: Session = Depends(get_db)
+) -> UsersGetUserByIdResponse:
+    try:
+        user_context = UserContext(UserRepository(session))
+        user: User = user_context.get_user_by_id(user_id=user_id)
+        return UsersGetUserByIdResponse(
+            id=user.id,
+            name=user.name,
+            phone=user.phone,
+        )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+class UpdateUserNameRequest(CamelModel):
+    name: str
+
+
+class UsersUpdateUserResponse(CamelModel):
+    id: str
+    name: str
+
+
+@user_router.put("/id/{user_id}", response_model=UsersUpdateUserResponse)
+async def update_user_name(
+    user_id: str,
+    req: UpdateUserNameRequest,
+    session: Session = Depends(get_db),
+) -> UsersUpdateUserResponse:
+    try:
+        user_context = UserContext(UserRepository(session))
+        update_data = UserUpdateData()
+        update_data.name = req.name
+        user: User = user_context.update_user(
+            user_id=user_id,
+            update_data=update_data,
+        )
+
+        return UsersUpdateUserResponse(
+            id=user.id,
+            name=user.name,
+        )
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+class UsersPutOnboardUserRequest(CamelModel):
     phone: str
     name: str
 
 
-class UsersPutOnboardUserResponse(BaseModel):
+class UsersPutOnboardUserResponse(CamelModel):
     pass
 
 
@@ -80,4 +139,4 @@ async def onboard_user(
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
