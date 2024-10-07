@@ -1,6 +1,7 @@
 # env.py
 
 from os import environ
+import os
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 from dotenv import load_dotenv
@@ -11,8 +12,11 @@ from app.models import *
 
 load_dotenv()
 
+db_url = os.getenv("DB_URL")
+
 # Alembic Config object
 config = context.config
+config.set_main_option("sqlalchemy.url", db_url)
 
 
 target_metadata = Base.metadata
