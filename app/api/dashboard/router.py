@@ -72,7 +72,7 @@ def _pack_response(budgets: list[Budget]) -> list[BudgetOverviewResponse]:
             )
             budget_breakdown.append(breakdown)
 
-        for spent_amount in category_expense_map.items():
+        for spent_amount in category_expense_map.values():
             total_unexpected_expenses += spent_amount
 
         if total_unexpected_expenses > 0:
